@@ -1,35 +1,24 @@
 import React, {Component} from 'react'
-import MessageList from './MessageList.jsx'
-import ChatBar     from './ChatBar.jsx'
-import NavBar      from './NavBar.jsx'
+import MessageList        from './MessageList.jsx'
+import ChatBar            from './ChatBar.jsx'
+import NavBar             from './NavBar.jsx'
+
 
 class App extends Component {
 
+  // INITIAL STATES
   constructor(props) {
     super(props);
     this.state = {
       currentUser: {name: "Anonymous"},
-      messages: [
-        // {
-        //   id       : 1,
-        //   type     :
-        //   username : "Bob",
-        //   content  : "Has anyone seen my marbles?"
-        // },
-        // {
-        //   id      : 2,
-        //   username: "Anonymous",
-        //   content: "No, I think you lost them. You lost your marbles Bob. You lost them for good."
-        // }
-      ],
+      messages: [],
       onlineUserCount: 0,
     }
   };
 
-
-
+  // ON COMPONENT MOUNT:
   componentDidMount() {
-    // Create a new WebSocket
+    // Create a WebSocket
     this.socket = new WebSocket("ws://localhost:3001")
     console.log('Connected to the server!')
 
@@ -38,8 +27,9 @@ class App extends Component {
   };
 
 
-  // Scrolls to the newest message
+  // ON COMPONENT UPDATE:
   componentDidUpdate() {
+    // Scroll to the last message after each updated
     const elements = document.getElementsByClassName('message-content')
     if (elements.length) {
       const element  = elements[elements.length - 1]
@@ -48,31 +38,30 @@ class App extends Component {
   }
 
 
-
-  // ---- Render the DOM and add listeners to some of the elements
+  // DOM RENDER
   render() {
     return (
       <div>
         <NavBar       onlineUserCounter = {this.state.onlineUserCounter}/>
-        <MessageList  messages          = {this.state.messages}
-                      notification      = {this.state.notification}/>
+        <MessageList  messages          = {this.state.messages}/>
         <ChatBar      currentUser       = {this.state.currentUser}
                       getNewUser        = {this.getNewUser}
                       sendNewMessage    = {this.sendNewMessage}/>
-
       </div>
     )
-  };
+  }
 
 
 
 
-  // ---- Get current user's name from DOM and change the state
+  // SEND A MESSAGE TO THE SERVER AFTER USER UPDATES THEIR NAME
   getNewUser = (event) => {
+
     event.preventDefault()
 
-    const newNotification = {
-      type    : 'incomingNotification',
+    // Create a new message object to send to the server
+    const newSystemMessage = {
+      type    : 'systemMessage',
       content : `${this.state.currentUser.name} changed their name to ${event.target.username.value}`
     }
 
@@ -80,50 +69,49 @@ class App extends Component {
     if (!event.target.username.value) {
       this.setState({currentUser: {name: "Anonymous"}})
     }
-    // else change it to the current user's name
+    // else change it to the new username
     else{
       this.setState({currentUser: {name: event.target.username.value}})
     }
 
+    // Send the change name notification to the server
+    this.socket.send(JSON.stringify(newSystemMessage))
+
+  }
 
 
-    this.socket.send(JSON.stringify(newNotification))
 
-  };
-
-
-
-  // ---- Get new messages from DOM and send them to the server
+  // SEND THE NEW MESSAGE TO THE SERVER TO BE BRODCASTED
   sendNewMessage = (event) => {
-    // Prevent the page from being reloaded everytime user submits a text
+
     event.preventDefault()
 
-    // Create a new message object
+    // Create a new message object to send to the server
     const newMessage = {
       // Get user from the state (updated by getUser function)
-      type      : 'incomingMessage',
+      type      : 'userMessage',
       username  : this.state.currentUser.name,
       content   : event.target.text.value
     };
 
-    // Clear the textarea
+    // Clear the textarea after user hit enter
     event.target.text.value = ''
 
     // Send the message to the server
     this.socket.send(JSON.stringify(newMessage))
 
-  };
+  }
 
 
 
-  // ---- Add recieved messages to the DOM
+  // UPDATE THE STATE WITH THE NEW MESSAGES
   addRecievedMessage = (receivedMessage) => {
     // Parsed the recived messages object
     var newMessage = JSON.parse(receivedMessage.data)
     // Concat the message to the messages in the state
     switch(newMessage.type) {
-      case "postMessage":
-      case "postNotification":
+      case "userMessage":
+      case "systemMessage":
         const messages = this.state.messages.concat(newMessage)
         this.setState({messages: messages})
         break;
@@ -131,7 +119,7 @@ class App extends Component {
         this.setState({onlineUserCounter: newMessage.count})
         break;
     }
-  };
+  }
 
 }
 
