@@ -1,6 +1,10 @@
-import React, {Component} from 'react';
+import React, {Component} from 'react'
+import renderHTML         from 'react-render-html'
+
 
 class Message extends Component {
+
+  // RENDERS MESSAGES
   render() {
     return (
       <div className={this.messageClassName(this.props.message.type)}>
@@ -10,9 +14,12 @@ class Message extends Component {
     )
   }
 
-  // Returns css class names based on the message type
+
+
+
+  // RETURNS CSS CLASS NAME BASED ON MESSAGE TYPE
   messageClassName = (messageType) => {
-    if ( messageType === 'postMessage') {
+    if ( messageType === 'userMessage') {
       return 'message'
     }
     else {
@@ -20,39 +27,41 @@ class Message extends Component {
     }
   }
 
-  // Returns a username for messages (not notifications)
+  // RETURNS USERNAME ELEMENT BASED ON MESSAGE TYPE
   messageUserName = (messageType) => {
-    if (messageType === 'postMessage') {
+    if (messageType === 'userMessage') {
       let usernameStyles = {
         color: this.props.message.color
       }
       return (
-        <span className="message-username" style={usernameStyles}>{this.props.message.username}</span>
+        <span className="message-username" style={usernameStyles}> <i className="fa fa-user" aria-hidden="true"></i> {this.props.message.username}</span>
       )
+    }
+    else {
+      return ''
     }
   }
 
 
-  // Searched for
+  // RETURN MESSAGE CONTENT ELEMENT BASED ON THE MESSAGE TYPE AND EXISTENCE OF AN IMAGE
   messageContent = (messageType) => {
-    // A regular expression to check if the message content has an image link
-    let re = /(?:(?:https?|ftp):\/\/)?(?:w{3}\.)?\S+\.\S+\/.+\.(?:png|jpg|gif)/
 
-    // Search for the image link in the message content
-    let image = this.props.message.content.match(re)
+    // If the message is a user message
+    if (messageType === 'userMessage') {
+      // A non greedy regular expression to check if the message content has any image link
+      let re = /(?:(?:https?|ftp):\/\/)?(?:w{3}\.)?\S+\.\S+\/.+?\.(?:png|jpg|gif)/ig
 
-    // If there is an image replace it with a div that includes that image
-    if (image && (messageType === 'postMessage')) {
-      let content = this.props.message.content.split(image[0])
+      let content = this.props.message.content
+
+      content = content.replace(re,'<div className="message-image"><img src="$&"></div>')
+
       return (
         <div className="message-content">
-          <span>{content[0]}</span>
-          <div className="message-image"><img src={image[0]} /></div>
-          <span>{content[1]}</span>
+          <span>{renderHTML(content)}</span>
         </div>
       )
     }
-    // else render the image
+    // If the message is a system message
     else {
       return (
         <div className="message-content">
