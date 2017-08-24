@@ -38,6 +38,16 @@ class App extends Component {
   };
 
 
+  // Scrolls to the newest message
+  componentDidUpdate() {
+    const elements = document.getElementsByClassName('message-content')
+    if (elements.length) {
+      const element  = elements[elements.length - 1]
+      element.scrollIntoView({block: "end"})
+    }
+  }
+
+
 
   // ---- Render the DOM and add listeners to some of the elements
   render() {
@@ -118,8 +128,7 @@ class App extends Component {
         this.setState({messages: messages})
         break;
       case "onlineUserCount":
-      this.setState({onlineUserCounter: newMessage.count})
-        // this.setState({message: })
+        this.setState({onlineUserCounter: newMessage.count})
         break;
     }
   };
