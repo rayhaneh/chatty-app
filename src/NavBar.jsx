@@ -5,6 +5,7 @@ class NavBar extends Component {
     return (
       <nav className="navbar">
         <a href="/" className="navbar-brand">Chatty</a>
+        <div>{this.props.onlineUserCounter} user(s) online</div>
       </nav>
     );
   }
