@@ -4,11 +4,11 @@ class ChatBar extends Component {
   render() {
     return (
       <footer className="chatbar">
-        <form onSubmit={this.props.getNewUser}>
-          <input className="chatbar-username" placeholder="Your Name (Optional)" name="username"/>
+        <form className="chatbar-username" onSubmit={this.props.getNewUser}>
+          <input placeholder="Your Name (Optional)" name="username"/>
         </form>
-        <form onSubmit={this.props.sendNewMessage}>
-          <input className="chatbar-message" placeholder="Type a message and hit ENTER" name="text" />
+        <form className="chatbar-message" onSubmit={this.props.sendNewMessage}>
+          <input placeholder="Type a message and hit ENTER" name="text" />
         </form>
       </footer>
     )
