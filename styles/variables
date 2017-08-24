@@ -1,0 +1,14 @@
+$color1: #b3e6b3;
+$color2: #339933;
+$color3: #194d19;
+
+$dgray: #ddd;
+$lgrey: #eee;
+
+
+
+@mixin linear-gradient($direction, $color-stops...) {
+  background: nth(nth($color-stops, 1), 1);
+  background: -webkit-linear-gradient(legacy-direction($direction), $color-stops);
+  background: linear-gradient($direction, $color-stops);
+}
