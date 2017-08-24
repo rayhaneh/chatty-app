@@ -67,15 +67,15 @@ function broadcastBackMessages(id, message) {
   let receivedMessage = JSON.parse(message)
   receivedMessage.id   = uuid()
   switch(receivedMessage.type) {
-    case "incomingMessage":
+    case "userMessage":
       let index = connectionIds.findIndex((connection) => {
         return connection.id === id
       })
       receivedMessage.color = connectionIds[index].color
-      receivedMessage.type = 'postMessage'
+      receivedMessage.type = 'userMessage'
       break;
-    case "incomingNotification":
-      receivedMessage.type = 'postNotification'
+    case "systemMessage":
+      receivedMessage.type = 'systemMessage'
       break;
     default:
       // show an error in the console if the message type is unknown
