@@ -11,16 +11,18 @@ class App extends Component {
       currentUser: {name: "Anonymous"},
       messages: [
         // {
-        //   id      : 1,
-        //   username: "Bob",
-        //   content: "Has anyone seen my marbles?",
+        //   id       : 1,
+        //   type     :
+        //   username : "Bob",
+        //   content  : "Has anyone seen my marbles?"
         // },
         // {
         //   id      : 2,
         //   username: "Anonymous",
         //   content: "No, I think you lost them. You lost your marbles Bob. You lost them for good."
         // }
-      ]
+      ],
+      onlineUserCount: 0,
     }
   };
 
@@ -41,11 +43,12 @@ class App extends Component {
   render() {
     return (
       <div>
-        <NavBar/>
-        <MessageList  messages       = {this.state.messages}/>
-        <ChatBar      currentUser    = {this.state.currentUser}
-                      getNewUser     = {this.getNewUser}
-                      sendNewMessage = {this.sendNewMessage}/>
+        <NavBar       onlineUserCounter = {this.state.onlineUserCounter}/>
+        <MessageList  messages          = {this.state.messages}
+                      notification      = {this.state.notification}/>
+        <ChatBar      currentUser       = {this.state.currentUser}
+                      getNewUser        = {this.getNewUser}
+                      sendNewMessage    = {this.sendNewMessage}/>
 
       </div>
     )
@@ -57,16 +60,25 @@ class App extends Component {
   // ---- Get current user's name from DOM and change the state
   getNewUser = (event) => {
     event.preventDefault()
+
+    const newNotification = {
+      type    : 'incomingNotification',
+      content : `${this.state.currentUser.name} changed their name to ${event.target.username.value}`
+    }
+
     // If the name input field is empty change the current state to Anonymous
-    if (!event.target.value) {
+    if (!event.target.username.value) {
       this.setState({currentUser: {name: "Anonymous"}})
-      // this.state.currentUser.name = 'Anonymous'
     }
     // else change it to the current user's name
     else{
-      this.setState({currentUser: {name: event.target.value}})
-      // this.state.currentUser.name = event.target.value
+      this.setState({currentUser: {name: event.target.username.value}})
     }
+
+
+
+    this.socket.send(JSON.stringify(newNotification))
+
   };
 
 
@@ -88,7 +100,7 @@ class App extends Component {
     event.target.text.value = ''
 
     // Send the message to the server
-    this.socket.send(JSON.stringify(newMessage));
+    this.socket.send(JSON.stringify(newMessage))
 
   };
 
@@ -98,16 +110,18 @@ class App extends Component {
   addRecievedMessage = (receivedMessage) => {
     // Parsed the recived messages object
     var newMessage = JSON.parse(receivedMessage.data)
+    console.log(newMessage)
+
     // Concat the message to the messages in the state
-    switch(data.type) {
+    switch(newMessage.type) {
       case "postMessage":
-        const messages = this.state.messages.concat(newMessage)
-        // Set the new state
-        this.setState({messages: messages})
-        // handle post message
-        break;
       case "postNotification":
-        // handle post notification
+        const messages = this.state.messages.concat(newMessage)
+        this.setState({messages: messages})
+        break;
+      case "onlineUserCount":
+      this.setState({onlineUserCounter: newMessage.count})
+        // this.setState({message: })
         break;
     }
   };
