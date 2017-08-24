@@ -110,8 +110,6 @@ class App extends Component {
   addRecievedMessage = (receivedMessage) => {
     // Parsed the recived messages object
     var newMessage = JSON.parse(receivedMessage.data)
-    console.log(newMessage)
-
     // Concat the message to the messages in the state
     switch(newMessage.type) {
       case "postMessage":
