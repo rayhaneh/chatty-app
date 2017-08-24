@@ -3,6 +3,7 @@
 const express      = require('express');
 const SocketServer = require('ws').Server;
 const uuid         = require('uuid/v4');
+var randomColor = require('randomcolor');
 
 
 // Set the port to 3001
@@ -21,32 +22,60 @@ const server = express()
 // Create the WebSockets server
 const wss = new SocketServer({ server });
 
+let connectionIds = []
 // Set up a callback that will run when a client connects to the server
 // When a client connects they are assigned a socket, represented by
 // the ws parameter in the callback.
 wss.on('connection', (ws) => {
-  console.log('Client connected');
+  ws.id = uuid()
+  console.log(`Client ${ws.id} connected`);
+  braodcastBackNumUsers(ws.id, true)
 
   // Broadcast back the recieved messages to all clients
-  ws.on('message', broadcastBack)
+  ws.on('message', (message) => {
+    broadcastBackMessages(ws.id, message)
+  })
+
 
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
-  ws.on('close', () => console.log('Client disconnected'));
+  ws.on('close', () => {
+    console.log(`Client ${ws.id} connected`);
+    braodcastBackNumUsers(ws.id, false)
+  });
 });
 
 
+function braodcastBackNumUsers (id, connected) {
+  if (connected) {
+    connectionIds.push({id: id, color: randomColor()})
+  }
+  else {
+    let index = connectionIds.findIndex((connection) => {
+      return connection.id === id
+    })
+    connectionIds.splice(index, 1)
+  }
+  let message = {
+    type : 'onlineUserCount',
+    count: connectionIds.length
+  }
+  wss.broadcast(JSON.stringify(message));
+}
 
-function broadcastBack(message) {
+
+function broadcastBackMessages(id, message) {
   let receivedMessage = JSON.parse(message)
-
+  receivedMessage.id   = uuid()
   switch(receivedMessage.type) {
     case "incomingMessage":
+      let index = connectionIds.findIndex((connection) => {
+        return connection.id === id
+      })
+      receivedMessage.color = connectionIds[index].color
       receivedMessage.type = 'postMessage'
-      receivedMessage.id   = uuid()
-      console.log(`${receivedMessage.id}, ${receivedMessage.type}: User '${receivedMessage.username}' said '${receivedMessage.content}'`)
       break;
     case "incomingNotification":
-      // handle incoming notification
+      receivedMessage.type = 'postNotification'
       break;
     default:
       // show an error in the console if the message type is unknown
