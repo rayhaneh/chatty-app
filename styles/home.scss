@@ -68,6 +68,14 @@ body {
   font-weight: 700;
 }
 
+.message-image {
+  max-width: 60%;
+  height: auto;
+}
+.message-image img {
+  width: 100%
+}
+
 .navbar {
   background: tomato;
   border-bottom: 1px solid black;
