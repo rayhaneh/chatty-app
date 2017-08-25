@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 
+// RENDER CHAT BAR
 class ChatBar extends Component {
   render() {
     return (

@@ -1,13 +1,12 @@
-// server.js
-
-const express      = require('express');
-const SocketServer = require('ws').Server;
-const uuid         = require('uuid/v4');
-var randomColor = require('randomcolor');
+// Required Packages
+const express      = require('express')
+const SocketServer = require('ws').Server
+const uuid         = require('uuid/v4')
+var   randomColor  = require('randomcolor')
 
 
 // Set the port to 3001
-const PORT = 3001;
+const PORT = 3001
 
 
 // Create a new express server
@@ -17,18 +16,18 @@ const server = express()
 .listen(
   PORT, '0.0.0.0', 'localhost',
   () => console.log(`Listening on ${ PORT }`)
-  );
+  )
 
 // Create the WebSockets server
 const wss = new SocketServer({ server });
 
-let connectionIds = []
-// Set up a callback that will run when a client connects to the server
-// When a client connects they are assigned a socket, represented by
-// the ws parameter in the callback.
+// An empty array of objects that will hold client ids and colors
+let connections = []
+
+// A callback that will run when a client connects to the server
 wss.on('connection', (ws) => {
   ws.id = uuid()
-  console.log(`Client ${ws.id} connected`);
+  console.log(`Client ${ws.id} connected`)
   braodcastBackNumUsers(ws.id, true)
 
   // Broadcast back the recieved messages to all clients
@@ -36,52 +35,52 @@ wss.on('connection', (ws) => {
     broadcastBackMessages(ws.id, message)
   })
 
-
-  // Set up a callback for when a client closes the socket. This usually means they closed their browser.
+  // Set up a callback for when a client closes the socket.
   ws.on('close', () => {
-    console.log(`Client ${ws.id} connected`);
+    console.log(`Client ${ws.id} disconnected`)
     braodcastBackNumUsers(ws.id, false)
-  });
-});
+  })
+})
 
 
+
+// Handle user connections and disconnections
 function braodcastBackNumUsers (id, connected) {
+  // Assigns an id and a random color when user connects
   if (connected) {
-    connectionIds.push({id: id, color: randomColor()})
+    connections.push({id: id, color: randomColor()})
   }
+  // Remove the connection from the list when user disconnects
   else {
-    let index = connectionIds.findIndex((connection) => {
+    let index = connections.findIndex((connection) => {
       return connection.id === id
     })
-    connectionIds.splice(index, 1)
+    connections.splice(index, 1)
   }
+  // Broadcast the number of online users
   let message = {
     type : 'onlineUserCount',
-    count: connectionIds.length
+    count: connections.length
   }
-  wss.broadcast(JSON.stringify(message));
+  wss.broadcast(JSON.stringify(message))
 }
 
 
+// Handle the messages comming from users
 function broadcastBackMessages(id, message) {
-  let receivedMessage = JSON.parse(message)
-  receivedMessage.id   = uuid()
-  switch(receivedMessage.type) {
-    case "userMessage":
-      let index = connectionIds.findIndex((connection) => {
-        return connection.id === id
-      })
-      receivedMessage.color = connectionIds[index].color
-      receivedMessage.type = 'userMessage'
-      break;
-    case "systemMessage":
-      receivedMessage.type = 'systemMessage'
-      break;
-    default:
-      // show an error in the console if the message type is unknown
-      throw new Error("Unknown event type " + data.type);
-  }
+  // The server receives two types of messages
+  // -- user messages
+  // -- system messages
 
+  let receivedMessage = JSON.parse(message)
+  // 1) Assign an id to that message
+  receivedMessage.id   = uuid()
+  // 2) Attach the corresponding user (connection) color to that message
+  let index = connections.findIndex((connection) => {
+    return connection.id === id
+  })
+  receivedMessage.color = connections[index].color
+  // 3) Broadcast the message
   wss.broadcast(JSON.stringify(receivedMessage));
 }
 

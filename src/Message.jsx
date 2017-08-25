@@ -2,9 +2,10 @@ import React, {Component} from 'react'
 import renderHTML         from 'react-render-html'
 
 
+
 class Message extends Component {
 
-  // RENDERS MESSAGES
+  // RENDER EACH MESSAGE ELEMENT
   render() {
     return (
       <div className={this.messageClassName(this.props.message.type)}>
@@ -34,7 +35,7 @@ class Message extends Component {
         color: this.props.message.color
       }
       return (
-        <span className="message-username" style={usernameStyles}> <i className="fa fa-user" aria-hidden="true"></i> {this.props.message.username}</span>
+        <span className='message-username' style={usernameStyles}> <i className='fa fa-user' aria-hidden='true'></i> {this.props.message.username}</span>
       )
     }
     else {
@@ -51,21 +52,24 @@ class Message extends Component {
       // A non greedy regular expression to check if the message content has any image link
       let re = /(?:(?:https?|ftp):\/\/)?(?:w{3}\.)?\S+\.\S+\/.+?\.(?:png|jpg|gif)/ig
 
+      // Replace all the image URLs with an image tag
       let content = this.props.message.content
-
       content = content.replace(re,'<div className="message-image"><img src="$&"></div>')
 
       return (
-        <div className="message-content">
+        <div className='message-content'>
           <span>{renderHTML(content)}</span>
         </div>
       )
     }
-    // If the message is a system message
+    // If the message is a 'system message'
     else {
+      let usernameStyles = {
+        color: this.props.message.color
+      }
       return (
-        <div className="message-content">
-          <span className="message-content">{this.props.message.content}</span>
+        <div className='message-content'>
+          <span className='message-content' style={usernameStyles}>{this.props.message.content}</span>
         </div>
       )
     }

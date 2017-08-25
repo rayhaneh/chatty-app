@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import MessageList        from './MessageList.jsx'
 import ChatBar            from './ChatBar.jsx'
 import NavBar             from './NavBar.jsx'
+import renderHTML         from 'react-render-html';
 
 
 class App extends Component {
