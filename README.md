@@ -1,8 +1,7 @@
 Chatty App
 =====================
 
-A client-side SPA (single-page app) uses React, a popular front-end library created and used heavily by Facebook as well as modern tools for Node including Webpack and Babel for multi-user real-time updates. No persistent database is involved in this app; the focus is on the client-side experience.
-
+A single page app that uses React, a popular front-end library created and used heavily by Facebook as well as modern tools for Node including Webpack and Babel for multi-user real-time updates. No persistent database is involved in this app; the focus is on the client-side experience.
 
 
 ### Final Product
@@ -11,10 +10,15 @@ A client-side SPA (single-page app) uses React, a popular front-end library crea
 
 
 ## Usage
-Clone this repository and install the dependencies and start both chatty-app and chattty-app-server.
+Clone this repository and install the dependencies for chatty-app and chatty-server.
 
 ```
 npm install
+```
+
+Start both chatty app and chatty app server
+
+```
 npm start
 open http://localhost:3000
 ```
